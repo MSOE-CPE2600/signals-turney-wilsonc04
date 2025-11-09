@@ -1,24 +1,32 @@
 /**
  * @file signal_segfault.c
- * @brief Program that dereferences a null pointer causing a segmentation fault
- */
-
-/**
- * Modified by:
- * 
+ * @brief Deliberately triggers a segmentation fault and installs a SIGSEGV handler that prints and returns.
+ *
+ * Modified by: Caleb Wilson
+ * CPE 2600 111
  * Brief summary of modifications:
+ *  - Creates a NULL pointer and dereferences it to cause SIGSEGV.
+ *  - SIGSEGV handler prints a message and returns (no recovery).
+ *  - Program behavior: it re-enters the same faulting instruction and signals again.
  */
-
 
 #include <stdio.h>
+#include <signal.h>
 
-int main (int argc, char* argv[]) {
-    // Declare a null pointer
-    int* i = NULL;
+static void handle_segv() {
+    printf("Handler: caught SIGSEGV (segmentation fault). Returning...\n");
+    // Per the assignment, do not exit or modify control flow here.
+}
 
-    // Dereference the null pointer
-    printf("The value of i is: %d\n", *i);
+int main(void) {
+    signal(SIGSEGV, handle_segv);
 
-    // Return to exit the program
+    // Deliberately cause a segmentation fault
+    int *i = NULL;
+    printf("About to dereference a NULL pointer...\n");
+    printf("Value at *i: %d\n", *i);  // faulting instruction
+
+    // Unreachable if fault repeats
+    printf("If you see this, the fault did not reoccur.\n");
     return 0;
 }
